@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-     <title>Hello world</title>
+     <script type="text/javascript" src="index.js"></script>
+     <title>Text To Gif</title>
   </head>
   <script src = "/socket.io/socket.io.js"></script>
 
@@ -9,31 +10,31 @@
      var socket = io();
      function onClicked(){
        socket.emit('record');
-     }
+       socket.on('message', function(data){
+        document.getElementById('transcript').innerHTML = data;});
+      }
   </script>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <style>
-.w3-button  {
-    width:150px;
-    margin: -20px -50px;
-    position:relative;
-    top:50%;
-    left:50%;
-    align-items: center;
-    justify-content: center;
-}
-
+body,h1,h2,h3,h4,h5,h6 {font-family: "Lato", sans-serif}
+.w3-bar,h1,button {font-family: "Montserrat", sans-serif}
+.fa-anchor,.fa-coffee {font-size:200px}
 </style>
-
-
 <body>
-  <script type="text/javascript" src="index.js"></script>
-<div class="w3-container">
-  <p><button  type="button" onclick="onClicked();" class="w3-button w3-pale-red" id="button" >Click Here!</button></p>
-</div>
 
+
+<!-- Header -->
+<header class="w3-container w3-red w3-center" style="padding:250px 16px">
+  <h1 class="w3-margin-small w3-jumbo">Click Below To Start</h1>
+  <button type="button" onclick="onClicked();" id="button" class="w3-button w3-black w3-padding-large w3-large w3-margin-top">Record</button>
+  <p id="transcript"></p>
+  <span id = "giphyme"></span>
+</header>
 
 
 </body>

@@ -8,20 +8,11 @@ app.get('/', function(req, res) {
 });
 
 io.on('connection', function(socket) {
-   console.log('A user connected');
-
    socket.on('record', function(){
-      syncRecognize();
-    });
+    //  syncRecognize();
+      //socket.send("hello" +   transcription);
+//function syncRecognize () {
 
-
-
-   socket.on('disconnect', function () {
-      console.log('A user disconnected');
-   });
-});
-
-function syncRecognize () {
   const Speech = require('@google-cloud/speech');
 
   // Instantiates a client
@@ -56,19 +47,23 @@ function syncRecognize () {
   };
 
   // Detects speech in the audio file
+  var transcription = "";
   speech.recognize(request)
     .then((data) => {
       const response = data[0];
-      const transcription = response.results.map(result =>
+      transcription = response.results.map(result =>
           result.alternatives[0].transcript).join('\n');
       console.log(`Transcription: `, transcription);
+      socket.send(transcription);
     })
     .catch((err) => {
       console.error('ERROR:', err);
     });
+    //  socket.send("hello" +   transcription);
 
-  }
-
+//  }
+});
+});
   http.listen(3000, function() {
      console.log('listening on *:3000');
   });
