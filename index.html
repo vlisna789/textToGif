@@ -1,13 +1,40 @@
-<!doctype HTML>
+<!DOCTYPE html>
 <html>
-  <head>
-    <title>
-      Index
-    </title>
+<head>
+     <title>Hello world</title>
   </head>
-  <body>
-    <h1>
-      Hello! Now you know how to serve HTML files using Node.js!!!
-    </h1>
-  </body>
+  <script src = "/socket.io/socket.io.js"></script>
+
+  <script>
+     var socket = io();
+     function onClicked(){
+       socket.emit('record');
+     }
+  </script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+
+<style>
+.w3-button  {
+    width:150px;
+    margin: -20px -50px;
+    position:relative;
+    top:50%;
+    left:50%;
+    align-items: center;
+    justify-content: center;
+}
+
+</style>
+
+
+<body>
+  <script type="text/javascript" src="index.js"></script>
+<div class="w3-container">
+  <p><button  type="button" onclick="onClicked();" class="w3-button w3-pale-red" id="button" >Click Here!</button></p>
+</div>
+
+
+
+</body>
 </html>

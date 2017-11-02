@@ -1,26 +1,26 @@
-const http = require('http');
-const port = 3000;
-  const fs = require('fs');
-fs.readFile('C:/Users/vlisn/Documents/speechapi/texttogif/index.html', function (err, html) {
-   if (err) throw err;
-http.createServer(function (req, res) {
-  res.writeHead(200, {'Content-Type': 'text/plain'});
-  res.write(html);
-  res.end()
-}).listen(port, (err) => {
-  if (err) {
-    return console.log('something bad happened', err);
-  }
+const fs = require('fs');
+var app = require('express')();
+var http = require('http').Server(app);
+var io = require('socket.io')(http);
+
+app.get('/', function(req, res) {
+   res.sendFile('C:/Users/vlisn/Documents/speechapi/texttogif/index.html');
 });
 
-  console.log(`server is listening on ${port}`)
+io.on('connection', function(socket) {
+   console.log('A user connected');
+
+   socket.on('record', function(){
+      syncRecognize();
+    });
+
+
+
+   socket.on('disconnect', function () {
+      console.log('A user disconnected');
+   });
 });
-var main = function () {
-    syncRecognize();
-}
-if (require.main === module) {
-    main();
-}
+
 function syncRecognize () {
   const Speech = require('@google-cloud/speech');
 
@@ -68,3 +68,7 @@ function syncRecognize () {
     });
 
   }
+
+  http.listen(3000, function() {
+     console.log('listening on *:3000');
+  });
