@@ -1,7 +1,15 @@
 const fs = require('fs');
+const path = require(`path`);
+const cwd = path.join(__dirname, `..`);
 var app = require('express')();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
+var record = require('node-record-lpcm16');
+const encoding = 'LINEAR16';
+
+// The sample rate of the audio file in hertz, e.g. 16000
+// const sampleRateHertz = 16000;
+const sampleRateHertz = 16000;
 
 app.get('/', function(req, res) {
    res.sendFile('C:/Users/vlisn/Documents/speechapi/texttogif/index.html');
@@ -9,59 +17,68 @@ app.get('/', function(req, res) {
 
 io.on('connection', function(socket) {
    socket.on('record', function(){
-    //  syncRecognize();
-      //socket.send("hello" +   transcription);
-//function syncRecognize () {
 
-  const Speech = require('@google-cloud/speech');
+     const record = require('node-record-lpcm16');
 
-  // Instantiates a client
-  const speech = Speech();
-  // The path to the local file on which to perform speech recognition, e.g. /path/to/audio.raw
-  // const filename = '/path/to/audio.raw'
-   const filename = 'C:/Users/vlisn/Documents/speechapi/texttogif/audio.raw';
-  // The encoding of the audio file, e.g. 'LINEAR16'
-  // const encoding = 'LINEAR16';
-  const encoding = 'LINEAR16';
+     // Imports the Google Cloud client library
+     const Speech = require('@google-cloud/speech');
 
-  // The sample rate of the audio file in hertz, e.g. 16000
-  // const sampleRateHertz = 16000;
-  const sampleRateHertz = 16000;
+     // Instantiates a client
+     const speech = Speech();
 
-  // The BCP-47 language code to use, e.g. 'en-US'
-  // const languageCode = 'en-US';
-  const languageCode = 'en-US';
+     // The encoding of the audio file, e.g. 'LINEAR16'
+     //
+     const encoding = 'LINEAR16';
 
-  const config = {
-    encoding: encoding,
-    sampleRateHertz: sampleRateHertz,
-    languageCode: languageCode
-  };
-  const audio = {
-    content: fs.readFileSync(filename).toString('base64')
-  };
+     // The sample rate of the audio file in hertz, e.g. 16000
+     //
+     const sampleRateHertz = 16000;
 
-  const request = {
-    config: config,
-    audio: audio
-  };
+     // The BCP-47 language code to use, e.g. 'en-US'
+     //
+     const languageCode = 'en-US';
 
-  // Detects speech in the audio file
-  var transcription = "";
-  speech.recognize(request)
-    .then((data) => {
-      const response = data[0];
-      transcription = response.results.map(result =>
-          result.alternatives[0].transcript).join('\n');
-      console.log(`Transcription: `, transcription);
-      socket.send(transcription);
-    })
-    .catch((err) => {
-      console.error('ERROR:', err);
-    });
-    //  socket.send("hello" +   transcription);
+     const request = {
+       config: {
+         encoding: encoding,
+         sampleRateHertz: sampleRateHertz,
+         languageCode: languageCode
+       },
+       interimResults: false // If you want interim results, set this to true
+     };
 
-//  }
+     // Create a recognize stream
+     const recognizeStream = speech.streamingRecognize(request)
+       .on('error', console.error)
+       .on('data', function(data) {
+         socket.send(data.results[0].alternatives[0].transcript);
+           process.stdout.write(
+             (data.results[0] && data.results[0].alternatives[0])
+               ? `Transcription: ${data.results[0].alternatives[0].transcript}\n`
+               : `\n\nReached transcription time limit, press Ctrl+C\n`)});
+
+
+
+     // Start recording and send the microphone input to the Speech API
+     record
+       .start({
+         sampleRateHertz: sampleRateHertz,
+         threshold: 0,
+         // Other options, see https://www.npmjs.com/package/node-record-lpcm16#options
+         verbose: false,
+         recordProgram: 'sox', // Try also "arecord" or "sox"
+         silence: '10.0'
+       })
+       .on('error', console.error)
+       .pipe(recognizeStream);
+
+       setTimeout(function () {
+         record.stop()
+       }, 10000)
+
+       console.log("start recording");
+
+
 });
 });
   http.listen(3000, function() {
