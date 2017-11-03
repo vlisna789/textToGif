@@ -11,8 +11,19 @@
      var socket = io();
      function onClicked(){
        socket.emit('record');
-       socket.on('message', function(data){
-        document.getElementById('transcript').innerHTML = data;});
+       socket.on('message', function(data){ document.getElementById('transcript').innerHTML = data; });
+       var downloadButton = document.getElementById("button");
+       var counter = 11;
+       id = setInterval(function() {
+         counter--;
+         if(counter < 0) {
+         downloadButton.innerHTML = "Record";
+        clearInterval(id);
+    } else {
+        downloadButton.innerHTML = counter.toString();
+    }
+}, 1000);
+
       }
   </script>
 <meta charset="UTF-8">

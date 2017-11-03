@@ -55,7 +55,7 @@ io.on('connection', function(socket) {
            process.stdout.write(
              (data.results[0] && data.results[0].alternatives[0])
                ? `Transcription: ${data.results[0].alternatives[0].transcript}\n`
-               : `\n\nReached transcription time limit, press Ctrl+C\n`)});
+               : `Reached end`)});
 
 
 
