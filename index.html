@@ -18,6 +18,7 @@
          counter--;
          if(counter < 0) {
          downloadButton.innerHTML = "Record";
+         document.getElementById('transcript').innerHTML = "";
         clearInterval(id);
     } else {
         downloadButton.innerHTML = counter.toString();
