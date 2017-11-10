@@ -1,19 +1,20 @@
 const fs = require('fs');
 const path = require(`path`);
 const cwd = path.join(__dirname, `..`);
-var app = require('express')();
+const express = require('express');
+var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var record = require('node-record-lpcm16');
-const encoding = 'LINEAR16';
-
-// The sample rate of the audio file in hertz, e.g. 16000
-// const sampleRateHertz = 16000;
-const sampleRateHertz = 16000;
+var giphy = require('giphy-api')( 'jnfd75LW8kmGvMt2wo466LYm7GFAWP5T' );
 
 app.get('/', function(req, res) {
    res.sendFile('C:/Users/vlisn/Documents/speechapi/texttogif/index.html');
 });
+
+app.use(express.static(__dirname));
+
+app.use('/images', express.static(__dirname +'/images'));
 
 io.on('connection', function(socket) {
    socket.on('record', function(){
@@ -52,10 +53,17 @@ io.on('connection', function(socket) {
        .on('error', console.error)
        .on('data', function(data) {
          socket.send(data.results[0].alternatives[0].transcript);
+         var str = data.results[0].alternatives[0].transcript;
+         if(str.indexOf("Coke") > -1) {
+            socket.emit('testerEvent');
+          }
+
            process.stdout.write(
              (data.results[0] && data.results[0].alternatives[0])
                ? `Transcription: ${data.results[0].alternatives[0].transcript}\n`
                : `Reached end`)});
+
+
 
 
 
@@ -67,19 +75,19 @@ io.on('connection', function(socket) {
          // Other options, see https://www.npmjs.com/package/node-record-lpcm16#options
          verbose: false,
          recordProgram: 'sox', // Try also "arecord" or "sox"
-         silence: '10.0'
+         silence: '3.0'
        })
        .on('error', console.error)
        .pipe(recognizeStream);
 
        setTimeout(function () {
          record.stop()
-       }, 10000)
+       }, 12000)
 
        console.log("start recording");
 
 
-});
+     });
 });
   http.listen(3000, function() {
      console.log('listening on *:3000');

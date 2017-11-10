@@ -4,21 +4,30 @@
      <script type="text/javascript" src="index.js"></script>
      <title>Text To Gif</title>
      <script src="//www.WebRTC-Experiment.com/RecordRTC.js"></script>
+     <meta charset="UTF-8">
+     <meta name="viewport" content="width=device-width, initial-scale=1">
+     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato">
+     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">
+     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   </head>
   <script src = "/socket.io/socket.io.js"></script>
-
   <script>
      var socket = io();
-     function onClicked(){
+     socket.on('testerEvent', function(data){;
+      document.getElementById("here_is_gif").style.visibility = "visible";
+     });
+     function onClicked() {
        socket.emit('record');
        socket.on('message', function(data){ document.getElementById('transcript').innerHTML = data; });
-       var downloadButton = document.getElementById("button");
+       var downloadButton = document.getElementById("search_button");
        var counter = 11;
        id = setInterval(function() {
          counter--;
          if(counter < 0) {
          downloadButton.innerHTML = "Record";
          document.getElementById('transcript').innerHTML = "";
+         document.getElementById("here_is_gif").style.visibility = "hidden";
         clearInterval(id);
     } else {
         downloadButton.innerHTML = counter.toString();
@@ -27,12 +36,6 @@
 
       }
   </script>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <style>
 body,h1,h2,h3,h4,h5,h6 {font-family: "Lato", sans-serif}
 .w3-bar,h1,button {font-family: "Montserrat", sans-serif}
@@ -40,15 +43,14 @@ body,h1,h2,h3,h4,h5,h6 {font-family: "Lato", sans-serif}
 </style>
 <body>
 
-
 <!-- Header -->
-<header class="w3-container w3-red w3-center" style="padding:250px 16px">
+<div class="w3-container w3-red w3-center" style="padding:250px 16px">
   <h1 class="w3-margin-small w3-jumbo">Click Below To Start</h1>
-  <button type="button" onclick="onClicked();" id="button" class="w3-button w3-black w3-padding-large w3-large w3-margin-top">Record</button>
+  <button type="button" onclick="onClicked();" id="search_button" class="w3-button w3-black w3-padding-large w3-large w3-margin-top">Record</button>
   <p id="transcript"></p>
-  <span id = "giphyme"></span>
-</header>
+  <img src="coke.png" id="here_is_gif" style='visibility:hidden'>
+</div>
 
-
+  <!-- My JavaScript -->
 </body>
 </html>
