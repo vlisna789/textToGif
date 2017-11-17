@@ -1,55 +1,52 @@
 const record = require('node-record-lpcm16');
 
 // Imports the Google Cloud client library
-const Speech = require('@google-cloud/speech');
+const speech = require('@google-cloud/speech');
 
-// Instantiates a client
-const speech = Speech();
+// Creates a client
+const client = new speech();
 
-// The encoding of the audio file, e.g. 'LINEAR16'
-//
-const encoding = 'LINEAR16';
+/**
+ * TODO(developer): Uncomment the following lines before running the sample.
+ */
+ const gcsUri = 'gs://my-bucket/audio.raw';
+ const encoding = 'LINEAR16';
+ const sampleRateHertz = 16000;
+ const languageCode = 'en-US';
 
-// The sample rate of the audio file in hertz, e.g. 16000
-//
-const sampleRateHertz = 16000;
-
-// The BCP-47 language code to use, e.g. 'en-US'
-//
-const languageCode = 'en-US';
-
-const request = {
-  config: {
-    encoding: encoding,
-    sampleRateHertz: sampleRateHertz,
-    languageCode: languageCode
-  },
-  interimResults: false // If you want interim results, set this to true
+const config = {
+  encoding: encoding,
+  sampleRateHertz: sampleRateHertz,
+  languageCode: languageCode,
 };
 
-// Create a recognize stream
-const recognizeStream = speech.streamingRecognize(request)
-  .on('error', console.error)
-  .on('data', function(data) {
-    console.log(data.results[0].alternatives.transcript);
-      process.stdout.write(
-        (data.results[0] && data.results[0].alternatives[0])
-          ? `Transcription: ${data.results[0].alternatives[0].transcript}\n`
-          : `\n\nReached transcription time limit, press Ctrl+C\n`)});
+const audio = {
+  uri: gcsUri,
+};
 
+const request = {
+  config: config,
+  audio: audio,
+};
 
-
-// Start recording and send the microphone input to the Speech API
-record
-  .start({
-    sampleRateHertz: sampleRateHertz,
-    threshold: 0,
-    // Other options, see https://www.npmjs.com/package/node-record-lpcm16#options
-    verbose: false,
-    recordProgram: 'rec', // Try also "arecord" or "sox"
-    silence: '10.0'
+// Detects speech in the audio file. This creates a recognition job that you
+// can wait for now, or get its result later.
+client
+  .longRunningRecognize(request)
+  .then(data => {
+    const operation = data[0];
+    // Get a Promise representation of the final result of the job
+    return operation.promise();
   })
-  .on('error', console.error)
-  .pipe(recognizeStream);
+  .then(data => {
+    const response = data[0];
+    const transcription = response.results
+      .map(result => result.alternatives[0].transcript)
+      .join('\n');
+    console.log(`Transcription: ${transcription}`);
+  })
+  .catch(err => {
+    console.error('ERROR:', err);
+  });
 
 console.log('Listening, press Ctrl+C to stop.');

@@ -18,7 +18,7 @@ app.use('/images', express.static(__dirname +'/images'));
 
 io.on('connection', function(socket) {
    socket.on('record', function(){
-
+   function recordSpeech() {
      const record = require('node-record-lpcm16');
 
      // Imports the Google Cloud client library
@@ -52,16 +52,25 @@ io.on('connection', function(socket) {
      const recognizeStream = speech.streamingRecognize(request)
        .on('error', console.error)
        .on('data', function(data) {
-         socket.send(data.results[0].alternatives[0].transcript);
+       try {
          var str = data.results[0].alternatives[0].transcript;
-         if(str.indexOf("Coke") > -1) {
-            socket.emit('testerEvent');
+       // I want a Coke
+        if(str.indexOf("okay freestyle") > -1) {
+            var command = data.results[0].alternatives[0].transcript;
+        if(command.indexOf("I want a ") > -1 ){
+             socket.send(command);
+             socket.emit('soda', command.split('want a ').pop());
           }
+         }
+       } catch (err) {
+       }
+
+
 
            process.stdout.write(
              (data.results[0] && data.results[0].alternatives[0])
                ? `Transcription: ${data.results[0].alternatives[0].transcript}\n`
-               : `Reached end`)});
+               : `Reached end only one minute`)});
 
 
 
@@ -73,18 +82,23 @@ io.on('connection', function(socket) {
          sampleRateHertz: sampleRateHertz,
          threshold: 0,
          // Other options, see https://www.npmjs.com/package/node-record-lpcm16#options
-         verbose: false,
+         verbose: true,
          recordProgram: 'sox', // Try also "arecord" or "sox"
          silence: '3.0'
        })
-       .on('error', console.error)
+       .on('error', function(){console.log("recognize error")})
        .pipe(recognizeStream);
+    console.log("start recording");
 
-       setTimeout(function () {
-         record.stop()
-       }, 12000)
+    setTimeout(function () {
+     record.stop()
+     console.log("stop recording")
+     recordSpeech();
+    }, 60000)
 
-       console.log("start recording");
+
+     }
+     recordSpeech();
 
 
      });
